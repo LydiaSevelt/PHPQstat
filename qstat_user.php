@@ -25,9 +25,9 @@
 </head>
 
 <?php
-$owner  = $_GET['owner'];
-$jobstat  = $_GET['jobstat'];
-$queue  = $_GET['queue'];
+$owner  = (isset($_GET['owner'])) ? $_GET['owner'] : "";
+$jobstat  = (isset($_GET['jobstat'])) ? $_GET['jobstat'] : "";
+$queue  = (isset($_GET['queue'])) ? $_GET['queue'] : "";
 echo "<body><table align=center width=100% border=\"0\" cellpadding=\"0\" cellspacing=\"0\"><tbody>";
 include("header.php");
 
