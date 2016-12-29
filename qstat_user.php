@@ -135,8 +135,7 @@ function show_pend($qstat,$owner,$queue) {
   }
   
   foreach ($qstat->xpath('//job_list') as $job_list) {
-          var_dump($job_list);
-	  if ($job_list->state != 'qw') {
+          if ($job_list->state != 'qw') {
 	    continue;
 	  }
 	  if ($owner != "all" && $job_list->JB_owner != $owner) {
