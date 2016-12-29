@@ -25,28 +25,15 @@
 </head>
 
 <?php
-$owner  = $_GET['owner'];
-$jobstat  = $_GET['jobstat'];
-$queue  = $_GET['queue'];
+$owner  = (isset($_GET['owner'])) ? $_GET['owner'] : "";
+$jobstat  = (isset($_GET['jobstat'])) ? $_GET['jobstat'] : "";
+$queue  = (isset($_GET['queue'])) ? $_GET['queue'] : "";
 echo "<body><table align=center width=100% border=\"0\" cellpadding=\"0\" cellspacing=\"0\"><tbody>";
 include("header.php");
 
-
+$token = null;
 if ($qstat_reduce != "yes" ) {
-
-	$password_length = 20;
-	function make_seed() {
-	  list($usec, $sec) = explode(' ', microtime());
-	  return (float) $sec + ((float) $usec * 100000);
-	}
-
-	srand(make_seed());
-
-	$alfa = "1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
-	$token = "";
-	for($i = 0; $i < $password_length; $i ++) {
-	  $token .= $alfa[rand(0, strlen($alfa))];
-	}
+    $token = tempnam(sys_get_temp_dir(), 'PHPQstat-');
 }
 
 function show_run($qstat,$owner,$queue) {
@@ -81,7 +68,7 @@ function show_run($qstat,$owner,$queue) {
 		  </tr></tfoot><tbody>";
   
   if ($qstat_reduce != "yes" ) {
-  	$qstat = simplexml_load_file("/tmp/$token.xml");
+  	$qstat = simplexml_load_file("$token");
   }
   foreach ($qstat->xpath('//job_list') as $job_list) {
 	  if ($job_list->state != 'r') {
@@ -144,10 +131,11 @@ function show_pend($qstat,$owner,$queue) {
 		  </tr></tfoot><tbody>";
 
   if ($qstat_reduce != "yes" ) {
-  	$qstat = simplexml_load_file("/tmp/$token.xml");
+  	$qstat = simplexml_load_file("$token");
   }
+  
   foreach ($qstat->xpath('//job_list') as $job_list) {
-	  if ($job_list->state != 'qw') {
+          if ($job_list->state != 'qw') {
 	    continue;
 	  }
 	  if ($owner != "all" && $job_list->JB_owner != $owner) {
@@ -196,9 +184,9 @@ switch ($jobstat) {
     case "r":
         $jobstatflag="-s r";
 	if ($qstat_reduce != "yes" ) {
-        	$out = exec("./gexml -u $owner $jobstatflag $queueflag -o /tmp/$token.xml");   
+        	$out = exec("./gexml -u $owner $jobstatflag $queueflag -o $token");   
         	show_run("",$owner,$queue);
-		exec("rm /tmp/$token.xml");
+		unlink($token); 
 	} else {
         	show_run($qstat,$owner,$queue);
 	}
@@ -206,9 +194,9 @@ switch ($jobstat) {
     case "p":
         $jobstatflag="-s p";
         if ($qstat_reduce != "yes" ) {
-	        $out = exec("./gexml -u $owner $jobstatflag $queueflag -o /tmp/$token.xml");
+	        $out = exec("./gexml -u $owner $jobstatflag $queueflag -o $token");
 	        show_pend("",$owner,$queue);
-		exec("rm /tmp/$token.xml");
+		unlink($token); 
 	} else {
         	show_pend($qstat,$owner,$queue);
 	}
@@ -216,18 +204,18 @@ switch ($jobstat) {
     default:
         $jobstatflag="-s r";
 	if ($qstat_reduce != "yes" ) {
-	        $out = exec("./gexml -u $owner $jobstatflag $queueflag -o /tmp/$token.xml");
+	        $out = exec("./gexml -u $owner $jobstatflag $queueflag -o $token");
 	        show_run("",$owner,$queue);
-		exec("rm /tmp/$token.xml");
+		unlink($token); 
 	} else {
 	        show_run($qstat,$owner,$queue);
 	}
 
         $jobstatflag="-s p";
 	if ($qstat_reduce != "yes" ) {
-	        $out = exec("./gexml -u $owner $jobstatflag $queueflag -o /tmp/$token.xml");
+	        $out = exec("./gexml -u $owner $jobstatflag $queueflag -o $token");
 	        show_pend("",$owner,$queue);
-		exec("rm /tmp/$token.xml");
+		unlink($token); 
 	} else {
         	show_pend($qstat,$owner,$queue);
 	}
@@ -249,4 +237,3 @@ include("bottom.php");
 
 </body>
 </html>
-
