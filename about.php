@@ -18,6 +18,7 @@ echo "<tr><td align=center>
 <a class='ui-button ui-widget ui-corner-all' href=\"qhost.php?owner=$owner\">Hosts status</a>
 <a class='ui-button ui-widget ui-corner-all' href=\"qstat.php?owner=$owner\">Queue status</a>
 <a class='ui-button ui-widget ui-corner-all' href=\"qstat_user.php?owner=$owner\">Jobs status ($owner)</a>
+<a class='ui-button ui-widget ui-corner-all' href=\"qacct_user.php?owner=$owner\">Completed Jobs ($owner)</a>
 <a class='ui-button ui-widget ui-corner-all' href=\"about.php?owner=$owner\">About PHPQstat</a>
 </td></tr>";
 
@@ -39,7 +40,7 @@ Originally written by Jordi Blasco Pallarès.<br><br>
 HTML5 interface utilizes the excellent <a href=https://datatables.net>datatables</a> and <a href=https://jquery.com>jquery</a> javascript libraries.<br><br>
 <b>LICENSE</b><br>
 This is free software: you are free to change and redistribute it. GNU General Public License version 3.0 (<a href=http://gnu.org/licenses/gpl.html target=gpl>GPLv3</a>).<br><br>
-<b>Version : 0.3.0 (December 2016)</b><br>
+<b>Version : 0.3.1 (December 2016)</b><br>
 <a href=https://github.com/LydiaSevelt/PHPQstat>https://github.com/LydiaSevelt/PHPQstat</a><br>
 </td></tr>
 </table>

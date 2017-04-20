@@ -12,9 +12,10 @@
 <br><br><br><br><br><br><br>
 <table align=center width=30% border="0" cellpadding="0" cellspacing="0">
   <tbody>
-    <tr>
+<!--    <tr>
       <td align=center><h1>PHPQstat</h1></td>
     </tr>
+-->
       <tr><td align="middle"><img src="img/logo.png"></td></tr>
     <tr>
       <td align=center>

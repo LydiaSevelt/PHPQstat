@@ -1,0 +1,17 @@
+#!/bin/bash
+source ./phpqstat.conf
+
+while getopts :d:j:o: OPTION
+do
+	case $OPTION in
+		j) job=$OPTARG
+		;;
+		d) length="-d $OPTARG"
+		;;
+		o) output=$OPTARG
+		;;
+	esac
+done
+
+qacct $length -j $job | ./qacct_xml.py > $output
+

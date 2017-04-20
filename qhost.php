@@ -30,6 +30,7 @@ echo "<tr><td align=center>
 <a class='ui-button ui-widget ui-corner-all' href=\"qhost.php?owner=$owner\">Hosts status</a>
 <a class='ui-button ui-widget ui-corner-all' href=\"qstat.php?owner=$owner\">Queue status</a>
 <a class='ui-button ui-widget ui-corner-all' href=\"qstat_user.php?owner=$owner\">Jobs status ($owner)</a>
+<a class='ui-button ui-widget ui-corner-all' href=\"qacct_user.php?owner=$owner\">Completed Jobs ($owner)</a>
 <a class='ui-button ui-widget ui-corner-all' href=\"about.php?owner=$owner\">About PHPQstat</a>
 </td></tr>";
 

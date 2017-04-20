@@ -50,6 +50,7 @@ echo "<tr><td align=center>
 <a class='ui-button ui-widget ui-corner-all' href=\"qhost.php?owner=$owner\">Hosts status</a>
 <a class='ui-button ui-widget ui-corner-all' href=\"qstat.php?owner=$owner\">Queue status</a>
 <a class='ui-button ui-widget ui-corner-all' href=\"qstat_user.php?owner=$owner\">Jobs status ($owner)</a>
+<a class='ui-button ui-widget ui-corner-all' href=\"qacct_user.php?owner=$owner\">Completed Jobs ($owner)</a>
 <a class='ui-button ui-widget ui-corner-all' href=\"about.php?owner=$owner\">About PHPQstat</a>
 </td></tr>";
 ?>
@@ -73,6 +74,7 @@ $qstat = simplexml_load_file("$token");
 $job_name=$qstat->djob_info->element[0]->JB_job_name;
 $job_owner=$qstat->djob_info->element[0]->JB_owner;
 $job_group=$qstat->djob_info->element[0]->JB_group;
+$job_project=$qstat->djob_info->element[0]->JB_project;
 $job_pe=$qstat->djob_info->element[0]->JB_pe;
 $job_ust=$qstat->djob_info->element[0]->JB_submission_time;
 if ($UGE == "yes") {
@@ -129,9 +131,10 @@ echo "	<table id=\"jobtable\" class=\"display\" align=left cellspacing=\"0\" wid
                 <th>Name</th>
                 <th>Owner</th>
                 <th>Group</th>
+                <th>Project</th>
+                <th>Queue</th>
                 <th>Submit Time</th>
                 <th>Start Time</th>
-                <th>Queue</th>
                 <th>PE</th>
                 <th>Slots</th>
                 </tr>
@@ -142,9 +145,10 @@ echo "	<table id=\"jobtable\" class=\"display\" align=left cellspacing=\"0\" wid
                 <td>$job_name</td>
                 <td>$job_owner</td>
                 <td>$job_group</td>
+                <td>$job_project</td>
+                <td>$job_qn</td>
                 <td>$job_st</td>
                 <td>$job_rst</td>
-                <td>$job_qn</td>
                 <td>$job_pe</td>
                 <td>$job_slots</td>
               </tr>	  
@@ -157,29 +161,60 @@ if ($jobstateflag == 'r') {
 	foreach ($qstat->xpath('//scaled') as $usage) {
 	$usage_stats[$i++]=$usage->UA_value;
 	}
-	if ($usage_stats[0] > 0){$cputime = time_duration($usage_stats[0], 'dhms');}else{$cputime = 0;}
-	echo "	<table id=\"jobinfo\" class=\"display\" align=center width=100% cellspacing=\"0\">
-		<thead>
-			<tr>
-			<th>CPUTime (s)</th>
-			<th>Mem (GB)</th>
-			<th>io</th>
-			<th>iow</th>
-			<th>VMem (M)</th>
-			<th>MaxVMem (M)</th>
-			</tr>
-		</thead>
-		   <tbody>
-			<tr>
-			<td>$cputime</td>
-			<td>".number_format($usage_stats[1]+0, 2, '.', '')."</td>
-			<td>".number_format($usage_stats[2]+0, 2, '.', '')."</td>
-			<td>".number_format($usage_stats[3]+0, 2, '.', '')."</td>
-			<td>".number_format($usage_stats[4]/1024/1024, 2, '.', '')."</td>
-			<td>".number_format($usage_stats[5]/1024/1024, 2, '.', '')."</td>
-		      </tr>
-		   </tbody>
-		</table><br>";
+	if ($UGE == "yes") {
+		// This seems wrong but aggrees with output from UGE, is this a UGE bug?
+		if ($usage_stats[0] > 0){$wallclocktime = time_duration($usage_stats[0], 'dhms');}else{$wallclocktime = 0;}
+		if ($usage_stats[1] > 0){$cputime = time_duration($usage_stats[0], 'dhms');}else{$cputime = 0;}
+		/* moved from table, saving
+				<td>".number_format($usage_stats[1]+0, 2, '.', '')."</td>
+				<td>".number_format($usage_stats[2]+0, 2, '.', '')."</td>	
+		*/
+		echo "	<table id=\"jobinfo\" class=\"display\" align=center width=100% cellspacing=\"0\">
+			<thead>
+				<tr>
+				<th>Runtime (Seconds)</br><font size=2>(wallclock)<font></th>
+				<th>Total CPU Time (Seconds)</th>
+				<th>I/O (Gigabytes)</th>
+				<th>I/O Wait Time (Seconds)</th>
+				<th>Max Virtual Memory Utilized (Gigabytes)</th>
+				</tr>
+			</thead>
+			   <tbody>
+				<tr>
+				<td>$wallclocktime</td>
+				<td>$cputime</td>
+				<td>".number_format($usage_stats[3]+0, 2, '.', '')."</td>
+				<td>".number_format($usage_stats[4]+0, 2, '.', '')."</td>
+				<td>".number_format($usage_stats[6]/1024/1024/1024, 2, '.', '')."</td>
+			      </tr>
+			   </tbody>
+			</table><br>";
+	} else {
+		if ($usage_stats[0] > 0){$cputime = time_duration($usage_stats[0], 'dhms');}else{$cputime = 0;}
+		/* moved from table, saving
+				<td>".number_format($usage_stats[1]+0, 2, '.', '')."</td>
+				<td>".number_format($usage_stats[2]+0, 2, '.', '')."</td>	
+		*/
+		echo "	<table id=\"jobinfo\" class=\"display\" align=center width=100% cellspacing=\"0\">
+			<thead>
+				<tr>
+				<th>Total CPU Time (Seconds)</th>
+				<th>I/O (Gigabytes)</th>
+				<th>I/O Wait Time (Seconds)</th>
+				<th>Max Virtual Memory Utilized (Gigabytes)</th>
+				</tr>
+			</thead>
+			   <tbody>
+				<tr>
+				<td>$cputime</td>
+				<td>".number_format($usage_stats[2]+0, 2, '.', '')."</td>
+				<td>".number_format($usage_stats[3]+0, 2, '.', '')."</td>
+				<td>".number_format($usage_stats[5]/1024/1024/1024, 2, '.', '')."</td>
+			      </tr>
+			   </tbody>
+			</table><br>";
+	}
+
 }
 
 unlink($token);

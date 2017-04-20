@@ -86,8 +86,9 @@ INSTALL
      export DRMAA_LIBRARY_PATH="/opt/sge/lib//libdrmaa.so"  
 7. If using qstat_reduce set LOAD_WAIT variable in phpqstat.conf for high load average protection :  
     LOAD_WAIT=10.00  
-8. Add the following line to the proper users crontab, making sure you replace /var/www/PHPQstat with the proper path :  
+8. Add the following lines to the proper users crontab, making sure you replace /var/www/PHPQstat with the proper path :  
     */3 * * * * /var/www/PHPQstat/accounting.sh > /dev/null 2>&1
+    0 1 * * * cd /var/www/PHPQstat && /var/www/PHPQstat/gactxml -d 30 -o /tmp/qacct_30_day.xml -j
 
   SETTING UP A REMOTE MASTER CONFIG
   ----------------------------------------------

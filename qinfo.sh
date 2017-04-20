@@ -62,5 +62,11 @@ fi
 # qstat all
 ./gexml -u all -o /tmp/qstat_all.xml
 
+# qacct 1 day
+./gactxml -d 1 -o /tmp/qacct_1_day.xml -j
+
+# qacct 7 day
+./gactxml -d 7 -o /tmp/qacct_7_day.xml -j
+
 # complete, remove runfile
 rm /tmp/qinfo.run
