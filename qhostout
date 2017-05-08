@@ -1,6 +1,0 @@
-#!/bin/bash
-# Exporting Environment Variables
-#########################################
-source ./phpqstat.conf
-#########################################
-qhost -xml -ncb > $1
