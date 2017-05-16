@@ -4,8 +4,6 @@ ABOUT PHPQstat
 With this interface, you and your users can monitor your jobs and your queue status conveniently via a web browser.
 
 **AUTHORS**  
-Renato Pancheri
-Original from:Lydia Sevelt 
 UGE support, HTML5 interface, qstat reduce and remote master options added by Lydia Sevelt (LydiaSevelt@gmail.com)  
 Originally written by Jordi Blasco Pallarès (jordi.blasco@hpcnow.com).
 
@@ -25,7 +23,7 @@ This is free software: you are free to change and redistribute it. GNU General P
 **Version**  
 Influx-alpha 
 
-https://github.com/renatopancheri/PHPQstat.git
+https://github.com/LydiaSevelt/PHPQstat
 
 
 
@@ -73,15 +71,9 @@ INSTALL
 		sudo systemctl enable grafana-server.service
 	instructions at:
 		https://grafana.com/grafana/download?platform=linux
-4. Install xmllint
-	-centOS :
-		yum install libxml2.x86_64
-	-ubuntu:
-		sudo apt-get install libxml2
-   	instructions at:
-		http://xmlsoft.org
+4. Install xquilla
 5. Set up variables in influx_config.sh
-6. run enable_auth_influx-sh (you may need sudo) and wait a few seconds
+6. run enable_auth_influx-sh or do it mannually (you may need sudo) and wait a few seconds
 7. Setup retention policy duration in  init_influx.sh :  
     defalut is INF (old data is not deleted )
     you can set the duration in time of the table containig 1)all measurements from qstat,
@@ -95,8 +87,6 @@ INSTALL
 	set $SCRIPTPATH in insert.sh and insert_tables.sh with the absolute path of the scripts(this is done because when those script are in crontab relative path fails)
 	Add the following line to the proper users crontab, making sure you replace [...]/insert.sh with the proper path :  
     */3 * * * * [...]/insert.sh > /dev/null 2>&1
-   Add the following line to the proper users crontab, making sure you replace [...]/insert_tables.sh with the proper path :  
-    */3 * * * * [...]/insert_tables.sh > /dev/null 2>&1
 11. set graphana:
 	you can access grafana with [YOUR_URL]:3000
 	default login admin admin
@@ -113,7 +103,7 @@ INSTALL
 12. set parameters in config.php 
 	set grafana url (go to you dashboard->share dashboard->link to dashboard or just copy paste browser url)
 	set Format for hosts,queues,jobs
-13. Set users in grafana so that not everyone can modify graph dashboard ecc.(you can also make users be able to modify the dashboard as they want, but they cannot save) 
+13. Set users in grafana so that not everyone can modify graph dashboard ecc.(you can also make users be able to modify the dashboard as they want, but they cannot save), you can disable log-in in the configuration file (auth.anonymous enabled=true)
 
 
   OPTIONAL

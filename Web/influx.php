@@ -30,24 +30,24 @@ function influxCurl($query){
 	$result=curl_exec($ch);
 	curl_close($ch);
 	return $result;
-
 }
-#data manipulation (transforms string from InfluxDB in matrix  elem[$column][$row])
+#data manipulation (transforms json output from InfluxDB in matrix  elem[$column][$row])
+#matrix is not of the formt M[$row][$column] because i need all the column names for the thead tag of the table
 function translateRequest($request){
 	$JSON=json_decode($request);
 	$ret=array();
-	foreach ($JSON->results[0]->series[0]->columns as $key => $value){
-		$i=strpos($value,'[');
+	$n_values=$JSON->results[0]->series[0]->values[0][array_search("{n_values}",$JSON->results[0]->series[0]->columns)];
+	foreach ($JSON->results[0]->series[0]->columns as $key => $value){#every key is in this format : $colname[$rowNumber]
+		$i=strpos($value,'[');#getting $colname
 		if($i!==FALSE){
-			$colname=substr($value,5,$i-5);#5: name start with "last_" when you select last(*) so i drop first 5 chars
-			$rowIndex=substr($value,$i+1,strpos($value,']')-$i-1);
-			$ret[$colname][$rowIndex]=$JSON->results[0]->series[0]->values[0][$key];
-		}
-		if($value=="last_{n_values}"){
-			$n_values=$JSON->results[0]->series[0]->values[0][$key];
+			$colname=substr($value,0,$i);
+			$rowIndex=substr($value,$i+1,strpos($value,']')-$i-1);#getting $rowNumber
+			if($rowIndex<$n_values){
+				$ret[$colname][$rowIndex]=$JSON->results[0]->series[0]->values[0][$key];#getting value
+			}
 		}
 	}
-	foreach ($ret as $key =>$column){
+	foreach ($ret as $key =>$column){#setting empty string where value is missing
 		for($i=0;$i<$n_values;$i++){
 			if(!isset($ret[$key][$i])){
 				$ret[$key][$i]="";
@@ -59,12 +59,13 @@ function translateRequest($request){
 #function to call from outside to print the final table 
 #Params:
 #	-$data:   result from getDataFromDB
-#	-$format: $Format["..."] (see config.php)
+#	-$format: $Format["$page"] (see config.php)
 function drawAll($data,$format){
 	if(!isset($format)){
 		$format=array();
 		$format["rename"]=array();
 		$format["links"]=array();
+		$format["tableOpt"]="";
 	}
 	if(!empty($data)){
 		foreach($format["rename"] as $key =>$newkey){#renaming columns
@@ -82,16 +83,15 @@ function drawAll($data,$format){
 				array_push($keys,$key);
 			}
 		}
-		addLinksToData($data,$format["links"],$keys);
-		printTable($data,$keys);
+		addLinksToData($data,$format["links"]);
+		printTable($data,$keys,$format["tableOpt"]);
 	}
 }
 #adds <a href... to a cell if defined so in config.php
 #Params:
 #	-$data:  data in format Matrix[$column][$row]
-#	-$links: $Format["..."]["links"] (see config.php)
-#	-$keys:  array containing columns names
-function addLinksToData(& $data,$links,$keys){
+#	-$links: $Format["$page"]["links"] (see config.php)
+function addLinksToData(& $data,$links){
 	foreach ($links as $column => $value){
 		foreach($data[$column] as $rowIndex =>$element){
 			$temp=$value;
@@ -105,45 +105,28 @@ function addLinksToData(& $data,$links,$keys){
 
 #prints the table
 #Params:
-#	-$data: data in format Matrix[$column][$row]
-#	-$keys: array containing columns names
-function printTable($data,$keys){
-echo "<script type=\"text/javascript\">
-	$(document).ready(function() {
-		var table=$('#myTable').DataTable({
-		  \"paging\": true,
-		  \"info\": false,
-		  \"searching\": true,
-		  dom: 'lrtp'
-		});
-
-		$('#myTable tfoot tr').appendTo('#myTable thead');
-		// Apply the search
-		table.columns().every( function () {
-			var that = this;
-			$( 'input', this.footer() ).on( 'keyup change', function () {
-			    if ( that.search() !== this.value ) {
-				that
-				    .search( this.value )
-				    .draw();
-			    }
-			} );
-		} );
-	} );
-  </script>";#div is added only because if you have a lot of columns, page buttons and next,previous,ecc are out of screen
-echo "<div style=\"width:1600px\">\n
-	<table id=\"myTable\" class=\"display\" align=center width=100% border=\"0\" cellpadding=\"0\" cellspacing=\"0\">\n";
-echo "<thead><tr>";
+#	-$data:		data in format Matrix[$column][$row]
+#	-$keys:		array containing columns names
+#	-$tableOpt:	string included in dataTables initialization
+function printTable($data,$keys,$tableOpt){
+echo "		<table id=\"myTable\" class=\"display compact nowrap\">
+			<thead>
+				<tr>";
 foreach ($keys as $column){
-	echo "<th>$column</th>";
+	echo "<th class=\"$column\">$column</th>";
 }
-echo "</tr></thead>\n<tfoot><tr>";
+echo "</tr>
+			</thead>
+			<tfoot>
+				<tr>";
 foreach ($keys as $column){
 	echo "<th><input  type=\"text\" placeholder=\"Search $column\" /></th>";#search inputs are created in tfoot and moved in thead after datatable creation(i cant find a simpler way to make them work right)
 }
-echo "</tr></tfoot>\n<tbody>\n";
+echo "				</tr>
+			</tfoot>
+			<tbody>\n";
 foreach ($data[$keys[0]] as $rowIndex=>$value){
-	echo "<tr>";
+	echo "				<tr>";
 	foreach ($keys as $colIndex){
 		echo "<td>";
 		echo $data[$colIndex][$rowIndex];
@@ -151,7 +134,37 @@ foreach ($data[$keys[0]] as $rowIndex=>$value){
 	}
 	echo "</tr>\n";
 }
-echo "</tbody>\n</table>\n</div>";
+echo "			</tbody>
+		</table>
+		<script type=\"text/javascript\">
+			$(document).ready(function() {
+				var table=$('#myTable').DataTable({
+					\"paging\": true,
+					\"info\": false,
+					\"searching\": true,
+					dom: 'Brtlp',
+					\"pageLength\": 25,
+					\"lengthMenu\": [ 10, 20, 25, 50, 75, 100 ],
+					buttons: [{
+						extend: 'colvis',
+						columns: ':not(.noVis)'
+			    		}]
+					$tableOpt
+				});
+				$('#myTable tfoot tr').appendTo('#myTable thead');
+				// Apply the search
+				table.columns().every( function () {
+					var that = this;
+					$( 'input', this.footer() ).on( 'keyup change', function () {
+					    if ( that.search() !== this.value ) {
+						that
+						    .search( this.value )
+						    .draw();
+					    }
+					} );
+				} );
+			} );
+		</script>";
 }
 ?>
 
