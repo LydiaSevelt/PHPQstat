@@ -21,107 +21,92 @@ Univa Grid Engine 8.3.1p6
 This is free software: you are free to change and redistribute it. GNU General Public License version 3.0 (GPLv3).
 
 **Version**  
-0.3.0 (December 2016)
+Influx-alpha 
 
 https://github.com/LydiaSevelt/PHPQstat
 
-SCREENSHOTS
-==============================================
-Screenshots were taken from a test instance of Son of Grid Engine 8.1.9
-
-
-Queue Status page with two test queues.
-![Alt text](https://cloud.githubusercontent.com/assets/4594964/21457190/37e6a6fc-c8fb-11e6-8b6c-f1b04b920e5c.jpg "Queue Status")
-
-
-All Jobs on the cluster, both running and in queue, tables are sortable by field, in the screenshot I am using the search feature to filter the running jobs table.
-![Alt text](https://cloud.githubusercontent.com/assets/4594964/21457203/5405e6b8-c8fb-11e6-9039-4af29a50761a.jpg "Job Status")
-
-
-All Jobs on the cluster with multiple parallel environment jobs with the new display scheme that shows all queues grouped with a single job.  
-![Alt text](https://cloud.githubusercontent.com/assets/4594964/22034925/fa44aec8-dcbb-11e6-9054-4e3c53f83569.jpg "Job Status with parallel environment jobs")
-
-
-Job information page displaying some details about a running job.
-![Alt text](https://cloud.githubusercontent.com/assets/4594964/21457210/5d1d7108-c8fb-11e6-8609-79425139d3f2.jpg "Job Info")
-
-
-Hosts Status with only the one desktop as the single host, so not very impressive looking.
-![Alt text](https://cloud.githubusercontent.com/assets/4594964/21457439/53acf240-c8fd-11e6-9c04-31d40a264593.jpg "Hosts Status")
 
 
 DEPENDENCIES
 ==============================================
-Basic setup (on sge_master host):  
-apache, php5, rrdtool and awk.
-
-Remote master setup:  
-webserver host: apache, php5, rrdtool, awk, snmp-utils  
-sge_master host: snmpd, awk  
+Setup (on sge_master host):  
+apache, php5, influxDB, xmllint, grafana and awk.
 
 INSTALL
 ==============================================
-1. Copy all files in your web accesible filesystem or download the project using GIT:  
-    git clone https://github.com/LydiaSevelt/PHPQstat
-2. Setup the following paths on phpqstat.conf :  
-    SGE_ROOT=/opt/sge  
-    SGE_CELL=default  
-    RRD_ROOT=/var/www/PHPQstat/rrd  
-    WEB_ROOT=/var/www/PHPQstat  
-3. Edit the line: "source /var/www/PHPQstat/phpqstat.conf" to point to the location of your phpqstat.conf  
-   in your web root in the files :  
-    accounting.sh  
-    qinfo.sh  
-4. Setup the following config variables in config.inc.php :  
-    $qstat_reduce="yes";  
-    $cache_time="3";  
-5. If using Univa Grid Engine set the variable in config.inc.php :  
-    $UGE="yes";  
-6. If using Son of Grid Engine and you do *not* already have a /$SGE_ROOT/$SGE_CELL/common/settings.sh file  
-   then copy the sog.8.1.9.settings.sh file to /$SGE_ROOT/$SGE_CELL/common/settings.sh and modify  
-   the variables to match your config :  
-     export SGE_ROOT="/opt/sge"  
-     export SGE_CELL="default"  
-     export SGE_CLUSTER_NAME="p6444"  
-     export DRMAA_LIBRARY_PATH="/opt/sge/lib//libdrmaa.so"  
-7. If using qstat_reduce set LOAD_WAIT variable in phpqstat.conf for high load average protection :  
-    LOAD_WAIT=10.00  
-8. Add the following line to the proper users crontab, making sure you replace /var/www/PHPQstat with the proper path :  
-    */3 * * * * /var/www/PHPQstat/accounting.sh > /dev/null 2>&1
+1. Install Apache,php5 and copy web directory in web accessible filesystem:
+	CentOs:	
+		yum install httpd
+		chkconfig --levels 235 httpd on
+		service httpd restart
+		yum -y install php
+		systemctl restart httpd
+	Ubuntu:
+		sudo apt-get install apache2
+		sudo apt-get install php
+		service apache2 restart
+2. Install influxDB 1.2:
+	CentOS:	
+		wget https://dl.influxdata.com/influxdb/releases/influxdb-1.2.2.x86_64.rpm
+		sudo yum localinstall influxdb-1.2.2.x86_64.rpm
+	Ubuntu-Debian:
+		wget https://dl.influxdata.com/influxdb/releases/influxdb_1.2.2_amd64.deb
+		sudo dpkg -i influxdb_1.2.2_amd64.deb
+	instructions at:
+		https://docs.influxdata.com/influxdb/v1.2/introduction/installation/
+3. Install grafana 4.2.0
+	1)
+	-Ubuntu & Debian(64 Bit)
+		wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_4.2.0_amd64.deb
+		sudo dpkg -i grafana_4.2.0_amd64.deb 
+	-Standalone Linux Binaries(64 Bit)
+		wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana-4.2.0.linux-x64.tar.gz
+		tar -zxvf grafana-4.2.0.linux-x64.tar.gz 
+	-Redhat & Centos(64 Bit)
+		wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana-4.2.0-1.x86_64.rpm
+		sudo yum localinstall grafana-4.2.0-1.x86_64.rpm
+	2)
+	-all:
+		service grafana-server start
+		sudo systemctl enable grafana-server.service
+	instructions at:
+		https://grafana.com/grafana/download?platform=linux
+4. Install xquilla
+5. Set up variables in influx_config.sh
+6. run enable_auth_influx-sh or do it mannually (you may need sudo) and wait a few seconds
+7. Setup retention policy duration in  init_influx.sh :  
+    defalut is INF (old data is not deleted )
+    you can set the duration in time of the table containig 1)all measurements from qstat,
+    2) the hour mean,
+    3)the day mean 
+8. run init_influx.sh
+9. (optional) copy data from previous rrd database
+   
+   run insert_rrd.sh ( you need to have rrd folder in the same path)
+10. start data gathering
+	set $SCRIPTPATH in insert.sh and insert_tables.sh with the absolute path of the scripts(this is done because when those script are in crontab relative path fails)
+	Add the following line to the proper users crontab, making sure you replace [...]/insert.sh with the proper path :  
+    */3 * * * * [...]/insert.sh > /dev/null 2>&1
+11. set graphana:
+	you can access grafana with [YOUR_URL]:3000
+	default login admin admin
+	- insert data source influxdb with url user:user password:user
+	-create your graph as you want
+	-usefull queries:
+		-template type query (can be multi-value): query="show field keys from min.queue" regex=/.*_(.*)/	should return list of queues	name Queues
+		-template type query (can be multi-value): query="show field keys from min.queue" regex=/(.*)_.*/	should return used,max		name Measurement
+		-template type query: query="show retention policies"							should return min.hour,day	name RetPolicy
+		-graph : SELECT last(/($Measurement)_($Queues)$/) FROM $RetPolicy.queue WHERE $timeFilter GROUP BY time($interval)
+		- you can make all max values be displayed differently by adding series ovverride (display tab)with regex /max_.*/
+	-remember to save the dashboard!
 
-  SETTING UP A REMOTE MASTER CONFIG
-  ----------------------------------------------
-9. Set REMOTE_MASTER in phpqstat.conf to the hostname of sge_master server :  
-    REMOTE_MASTER=sgemaster.company.com  
-10. Configure snmpd on sge_master host to provide uptime and load information via community public :  
-    ```
-    com2sec notConfigUser  default       public  
-    group   notConfigGroup v1           notConfigUser  
-    view    systemview    included   .1.3.6.1.4.1.2021.10  
-    access  notConfigGroup ""      any       noauth    exact  systemview none none  
-    ```
-    
+12. set parameters in config.php 
+	set grafana url (go to you dashboard->share dashboard->link to dashboard or just copy paste browser url)
+	set Format for hosts,queues,jobs
+13. Set users in grafana so that not everyone can modify graph dashboard ecc.(you can also make users be able to modify the dashboard as they want, but they cannot save), you can disable log-in in the configuration file (auth.anonymous enabled=true)
+
+
   OPTIONAL
   ----------------------------------------------
-11. Replace PHPQstat/img/logo.png with the logo of your company/school to brand the page  
+14. Replace PHPQstat/img/logo.png with the logo of your company/school to brand the page 
 
-TODO LIST
-==============================================
-* Add install script to take care of some of the tedium automatically
-* Add job accounting page and qstat_reduce functionality to allow users to view stats on completed jobs
-* Admin page - config variables, display options, project/department, etc
-* Add additional job information to job page
-* Completely replace rrdtool graphs with something pretty (grafana?)
-
-CHANGELOG
-==============================================
-* 0.1.0 Project started
-* 0.1.1 Install instructions and job details support
-* 0.1.2 Solved problem on cputime request on pending job
-* 0.1.3 Solved problems with Start time and Submission Time
-* 0.2.0 Real-time accounting feature
-* 0.2.1 Migration to HPCNow GitHUB repo
-* 0.2.2 Added qstat_reduce to cache xml files and only refesh based a time interval with high load average protection
-* 0.2.3 Added ability to run phpqstat on a webserver that is a submit host, eliminating the need to run on the sge_master node
-* 0.3.0 Added new HTML5 interface to fix look and feel as well as add functionality for users, This utilizes the excellent datatables and jquery-ui javascript libraries. Added UGE support option.
-* 0.3.1 Parallel environment jobs are now displayed in a single line with all active queues associated. Many other small bug fixes and improvments as well. Install instructions also updated.
