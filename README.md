@@ -14,8 +14,7 @@ Report bugs to GitHUB issue Tracker https://github.com/LydiaSevelt/PHPQstat/issu
 The HTML5 interface utilizes the excellent datatables (https://datatables.net) and jquery (https://jquery.com) javascript libraries.  
 
 **TESTED WITH**  
-Son of Grid Engine 8.1.9  
-Univa Grid Engine 8.3.1p6  
+GE 6.2u5
 
 **LICENSE**  
 This is free software: you are free to change and redistribute it. GNU General Public License version 3.0 (GPLv3).

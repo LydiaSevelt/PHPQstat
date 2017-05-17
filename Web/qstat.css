@@ -6,7 +6,6 @@ iframe {
 	border: none;        
 	height: 90vh;        
 	width: 100vw;
-	height:85vh;
 	margin-left:auto;
 	margin-right:auto;
 }
@@ -43,15 +42,20 @@ line-height:80px;
 margin:0 auto;
 
 }
-.footer{
-	margin-top:50px;
-	color: #999999;
+.footer {
+        margin-top:30px;
+        color: #AAAAAA;
+        font-size: 90%;
 }
 .footer p{
 	text-align:center;
 
 }
-.footer a{
-	text-decoration:none;
-	color: #000000;
+.footer a {
+        text-decoration:none;
+        color: #999999;
+}
+.footer a:hover {
+        text-decoration:none;
+        color: #666666;
 }
