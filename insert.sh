@@ -134,6 +134,26 @@ getQueueFromJobXmlVector(){
 	XPath+="' ',' ')"
 	echo $(myxml "$XPath" "$2")
 }
+#for the slot number i have to count the slave jobs
+getSlotsFromJobXmlVector(){
+	local XPath=$'concat('
+	local n=$(myxml "count($1[master=\"MASTER\"])" "$2")	
+	for((i=0;$i<$n;i++))
+	do
+		XPath+="string($1[$i]/JB_job_number),' ',"
+	done
+	XPath+="' ',' ')"
+	local names=$(myxml "$XPath" "$2")
+	XPath=$'concat('
+	local i=0
+	for name in $names;
+	do
+		XPath+="'slots[$i]=\"',count($1[JB_job_number=\"$name\"]),'\",',"
+		i=$[ $i+1 ]
+	done
+	XPath+="' ',' ')"
+	echo $(myxml "$XPath" "$2")
+}
 #########################gathering data for grafana###################
 DATA=$($QUEUE_COMMAND_GRAPH | awk  '{if($1 !~ /CLUSTER/ && $3 ~ /^[0-9]/){printf "queue used_%s=%s,max_%s=%s\n", $1,$3,$1,$6}}')
 curl -i -u $INFLUXUSER:$INFLUXPASSWORD -XPOST $URL_GRAPH --data-binary "$DATA"
@@ -176,6 +196,8 @@ getJobs(){
 	JOBS_DATA+=$(getValuesFromXmlVector "/abc/*" "$EXEC")
 	t=$(getQueueFromJobXmlVector "(job_info/queue_info/Queue-List/job_list[master=\"MASTER\"])" "$JOB_RESULT")
 	JOBS_DATA+=",$t"
+	t=$(getSlotsFromJobXmlVector "(job_info/queue_info/Queue-List/job_list)" "$JOB_RESULT")
+	JOBS_DATA+="$t"
 	JOBS_DATA=${JOBS_DATA:0:$[ ${#JOBS_DATA} -1 ]}
 	curl -i -u $INFLUXUSER:$INFLUXPASSWORD -XPOST $URL --data-binary "$JOBS_DATA"
 }
