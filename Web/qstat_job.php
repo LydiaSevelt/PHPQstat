@@ -28,8 +28,8 @@ foreach ($jobs as $key=>$value){
 				var table=$('#job_table').DataTable({
 					"paging": false,
 					"info": false,
-					"searching": true
-			
+					"searching": true,
+					"columns":[{className:"dt-right"},{className:"dt-left"}]
 				});
 			});
 		</script>

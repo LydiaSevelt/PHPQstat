@@ -66,6 +66,7 @@ function drawAll($data,$format){
 		$format["rename"]=array();
 		$format["links"]=array();
 		$format["tableOpt"]="";
+		$format["filter"]=array();
 	}
 	if(!empty($data)){
 		foreach($format["rename"] as $key =>$newkey){#renaming columns
@@ -84,6 +85,7 @@ function drawAll($data,$format){
 			}
 		}
 		addLinksToData($data,$format["links"]);
+		addFilterToData($data,$keys,$format["filter"]);
 		printTable($data,$keys,$format["tableOpt"]);
 	}
 }
@@ -103,6 +105,15 @@ function addLinksToData(& $data,$links){
 	}
 }
 
+function addFilterToData(& $data,$keys,$filter){
+	foreach($filter as $column){
+		foreach($data[$column] as $rowIndex=>$element){
+			$data[$column][$rowIndex]="<div onclick=\"filter('".array_search($column,$keys)."',this.innerHTML)\">".$data[$column][$rowIndex]."</div>";
+		}
+	}
+
+}
+
 #prints the table
 #Params:
 #	-$data:		data in format Matrix[$column][$row]
@@ -119,37 +130,48 @@ echo "</tr>
 			</thead>
 			<tfoot>
 				<tr>";
-foreach ($keys as $column){
-	echo "<th><input  type=\"text\" placeholder=\"Search $column\" /></th>";#search inputs are created in tfoot and moved in thead after datatable creation(i cant find a simpler way to make them work right)
+foreach ($keys as $key=>$column){
+	echo "<th><input id=\"search_$key\" type=\"text\" placeholder=\"Search $column\" /></th>";#search inputs are created in tfoot and moved in thead after datatable creation(i cant find a simpler way to make them work right)
 }
 echo "				</tr>
 			</tfoot>
 			<tbody>\n";
 foreach ($data[$keys[0]] as $rowIndex=>$value){
 	echo "				<tr>";
-	foreach ($keys as $colIndex){
+	foreach ($keys as $key=>$colIndex){
 		echo "<td>";
 		echo $data[$colIndex][$rowIndex];
 		echo "</td>";
 	}
 	echo "</tr>\n";
 }
-echo "			</tbody>
+?>
+			</tbody>
 		</table>
-		<script type=\"text/javascript\">
+		<script type="text/javascript">
+			var table;
+			function filter(col,text){
+				$('#search_'+col).val(text);
+				search(col,text);
+			}
+			function search(col,text){
+				table.column(col).search(text).draw();
+			}
 			$(document).ready(function() {
-				var table=$('#myTable').DataTable({
-					\"paging\": true,
-					\"info\": false,
-					\"searching\": true,
+				table=$('#myTable').DataTable({
+					"paging": true,
+					"info": false,
+					"searching": true,
 					dom: 'Brtlp',
-					\"pageLength\": 25,
-					\"lengthMenu\": [ 10, 20, 25, 50, 75, 100 ],
+					"pageLength": 25,
+					"lengthMenu": [ 10, 20, 25, 50, 75, 100 ],
 					buttons: [{
 						extend: 'colvis',
 						columns: ':not(.noVis)'
 			    		}]
-					$tableOpt
+<?php
+echo $tableOpt
+?>
 				});
 				$('#myTable tfoot tr').appendTo('#myTable thead');
 				// Apply the search
@@ -157,14 +179,12 @@ echo "			</tbody>
 					var that = this;
 					$( 'input', this.footer() ).on( 'keyup change', function () {
 					    if ( that.search() !== this.value ) {
-						that
-						    .search( this.value )
-						    .draw();
+					       search(that,this.value);
 					    }
 					} );
 				} );
 			} );
-		</script>";
+		</script>
+<?php
 }
 ?>
-

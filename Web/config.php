@@ -25,6 +25,7 @@ $Query["jobs"]="SELECT * FROM jobs group by * order by time DESC limit 1";#trans
 #	-tableOpt: a string that is placed in the javascript code that declares the dataTable 
 #		you can use it to specify datatable option for a single page
 #		the string needs to start with ,
+#	-filter: an array where the values are the names of the columns where the cells are going filter the table if you click on it
 #the options have to be in this way $Format["page_name"]["option"]=...
 $Format=array();
 $Format["hostnames"]=array();
@@ -51,7 +52,7 @@ $Format["hosts"]["links"]=array(
 	#"column where link has to be"=>"qstat_job.php?id={a column}"
 );
 $Format["hosts"]["tableOpt"]="";
-
+$Format["hosts"]["filter"]=array();
 
 $Format["queues"]["rename"]=array(
 	"name"=>"Name",
@@ -63,6 +64,7 @@ $Format["queues"]["rename"]=array(
 );
 $Format["queues"]["show"]=array("Name","Load","Slots Used","Total Slots","Available Slots","temp_disabled","manual_intervention","resv");
 $Format["queues"]["tableOpt"]="";
+$Format["queues"]["filter"]=array();
 $Format["jobs"]["rename"]=array(
 	"JAT_ntix"=>"ntix",
 	"JAT_prio"=>"prio",
@@ -117,4 +119,5 @@ $Format["jobs"]["tableOpt"]=",\"columnDefs\": [{
 		'master','otickets','full_job_name','requested_pe_name','share','ntix',
 		'project','start time','submission time','requested_pe','granted_pe_name'] 
 }]";
+$Format["jobs"]["filter"]=array("owner");
 ?>
