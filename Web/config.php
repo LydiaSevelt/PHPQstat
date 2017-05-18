@@ -59,23 +59,26 @@ $Format["queues"]["rename"]=array(
 	"load"=>"Load",
 	"used"=>"Slots Used",
 	"total"=>"Total Slots",
-	"available"=>"Available Slots"
+	"available"=>"Available Slots",
+	"temp_disabled"=>"Temp disabled",
+	"manual_intervention"=>"Manual intervention",
+	"resv"=>"Resv"
 	
 );
-$Format["queues"]["show"]=array("Name","Load","Slots Used","Total Slots","Available Slots","temp_disabled","manual_intervention","resv");
+$Format["queues"]["show"]=array("Name","Load","Slots Used","Total Slots","Available Slots","Temp disabled","Manual intervention","Resv");
 $Format["queues"]["tableOpt"]="";
 $Format["queues"]["filter"]=array();
 $Format["jobs"]["rename"]=array(
 	"JAT_ntix"=>"ntix",
-	"JAT_prio"=>"prio",
+	"JAT_prio"=>"Priority",
 	"JAT_share"=>"share",
 	"JAT_start_time"=>"start time",
 	"JB_department"=>"department",
 	"JB_job_number"=>"Job Number",
-	"JB_jobshare"=>"job share",
-	"JB_name"=>"job name",
+	"JB_jobshare"=>"Job share",
+	"JB_name"=>"Job name",
 	"JB_override_tickets"=>"override tickets",
-	"JB_owner"=>"owner",
+	"JB_owner"=>"Owner",
 	"JB_project"=>"project",
 	"JB_submission_time"=>"submission time",
 	#"_state"=>"state",
@@ -98,14 +101,14 @@ $Format["jobs"]["rename"]=array(
 	"queue"=>"Queue",
 	#"requested_pe"=>"",
 	#"requested_pe_name"=>"",
-	#"slots"=>"",
-	#"state"=>"",
+	"slots"=>"Slots",
+	"state"=>"State",
 	#"stickets"=>"",
 	#"tickets"=>""
 );
-$Format["jobs"]["show"]=array("Job Number","job name","state","Queue","slots","prio","owner",
+$Format["jobs"]["show"]=array("Job Number","Job name","State","Queue","Slots","Priority","Owner",
 	"_state","ftickets","stickets",
-	"tickets","CPU Usage","I/O Usage","Memory Usage","job share","department","granted_pe","hard_req_queue",
+	"tickets","CPU Usage","I/O Usage","Memory Usage","Job share","department","granted_pe","hard_req_queue",
 	"hard_request","hard_request_name","hard_request_resource_contribution",
 	"master","otickets","full_job_name","requested_pe_name","share","ntix","project",
 	"start time","submission time","requested_pe","granted_pe_name","override tickets");
@@ -119,5 +122,5 @@ $Format["jobs"]["tableOpt"]=",\"columnDefs\": [{
 		'master','otickets','full_job_name','requested_pe_name','share','ntix',
 		'project','start time','submission time','requested_pe','granted_pe_name'] 
 }]";
-$Format["jobs"]["filter"]=array("owner");
+$Format["jobs"]["filter"]=array("Owner");
 ?>

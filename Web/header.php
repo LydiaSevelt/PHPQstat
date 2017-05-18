@@ -14,9 +14,9 @@
 	<body>
 		<ul id="nav">
 			<li><img src="img/logo.png" height=80 width=80 class="" alt="logo"></li>
-			<li><a class='ui-button' href="index.php">Home</a></li>
-			<li><a class='ui-button' href="index.php?page=hosts">Hosts status</a></li>
-			<li><a class='ui-button' href="index.php?page=queues">Queue status</a></li>
-			<li><a class='ui-button' href="index.php?page=jobs">Jobs status</a></li>
+			<li><a class="ui-button ui-widget ui-corner-all" href="index.php">Home</a></li>
+			<li><a class="ui-button ui-widget ui-corner-all" href="index.php?page=hosts">Hosts status</a></li>
+			<li><a class="ui-button ui-widget ui-corner-all" href="index.php?page=queues">Queue status</a></li>
+			<li><a class="ui-button ui-widget ui-corner-all" href="index.php?page=jobs">Jobs status</a></li>
 		</ul>
 

@@ -108,7 +108,7 @@ function addLinksToData(& $data,$links){
 function addFilterToData(& $data,$keys,$filter){
 	foreach($filter as $column){
 		foreach($data[$column] as $rowIndex=>$element){
-			$data[$column][$rowIndex]="<div onclick=\"filter('".array_search($column,$keys)."',this.innerHTML)\">".$data[$column][$rowIndex]."</div>";
+			$data[$column][$rowIndex]="<div class=\"div-filter\"onclick=\"filter('".array_search($column,$keys)."',this.innerHTML)\">".$data[$column][$rowIndex]."</div>";
 		}
 	}
 
@@ -164,7 +164,7 @@ foreach ($data[$keys[0]] as $rowIndex=>$value){
 					"searching": true,
 					dom: 'Brtlp',
 					"pageLength": 25,
-					"lengthMenu": [ 10, 20, 25, 50, 75, 100 ],
+					"lengthMenu": [[10,20,25,50,75,100,-1],[ 10, 20, 25, 50, 75, 100 ,"All"]],
 					buttons: [{
 						extend: 'colvis',
 						columns: ':not(.noVis)'

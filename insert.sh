@@ -1,6 +1,6 @@
 #!/bin/bash
 ####################init variables##########################
-SCRIPTPATH="//home/ubuntu123456789/Desktop/qstat_2" #supposed to be the folder where you have this script,
+SCRIPTPATH="/var/www/html/phpqstat" #supposed to be the folder where you have this script,
 #	this is needed because when cron.d run this script the paths are messed up
 source $SCRIPTPATH/influx_config.sh
 DATABASE='QstatDB_tables'
@@ -140,7 +140,7 @@ getSlotsFromJobXmlVector(){
 	local n=$(myxml "count($1[master=\"MASTER\"])" "$2")	
 	for((i=0;$i<$n;i++))
 	do
-		XPath+="string($1[$i]/JB_job_number),' ',"
+		XPath+="string($1[master=\"MASTER\"][$i]/JB_job_number),' ',"
 	done
 	XPath+="' ',' ')"
 	local names=$(myxml "$XPath" "$2")
