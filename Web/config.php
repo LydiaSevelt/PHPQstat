@@ -99,28 +99,34 @@ $Format["jobs"]["rename"]=array(
 	"mem_usage"=>"Memory Usage",
 	#"otickets"=>"",
 	"queue"=>"Queue",
-	#"requested_pe"=>"",
+	"requested_pe"=>"Requested slots",
 	#"requested_pe_name"=>"",
 	"slots"=>"Slots",
 	"state"=>"State",
 	#"stickets"=>"",
 	#"tickets"=>""
 );
-$Format["jobs"]["show"]=array("Job Number","Job name","State","Queue","Slots","Priority","Owner",
+$Format["jobs"]["show"]=array("Job Number","Job name","State","Queue","Requested slots","Priority","Owner",
 	"_state","ftickets","stickets",
 	"tickets","CPU Usage","I/O Usage","Memory Usage","Job share","department","granted_pe","hard_req_queue",
 	"hard_request","hard_request_name","hard_request_resource_contribution",
 	"master","otickets","full_job_name","requested_pe_name","share","ntix","project",
-	"start time","submission time","requested_pe","granted_pe_name","override tickets");
+	"start time","submission time","Slots","granted_pe_name","override tickets");
 $Format["jobs"]["links"]["Job Number"]="qstat_job.php?id={Job Number}";
-$Format["jobs"]["tableOpt"]=",\"columnDefs\": [{ 
-	\"visible\": false,
-	targets: ['_state','def_hard_request','def_hard_request_name',
-		'ftickets','stickets','tickets','CPU Usage','I/O Usage','Memory Usage',
-		'job share','department','granted_pe','hard_req_queue','hard_request',
-		'hard_request_name','hard_request_resource_contribution',
-		'master','otickets','full_job_name','requested_pe_name','share','ntix',
-		'project','start time','submission time','requested_pe','granted_pe_name'] 
-}]";
+$Format["jobs"]["tableOpt"]=",\"columnDefs\": [
+	{ 
+		\"visible\": false,
+		targets: ['_state','def_hard_request','def_hard_request_name',
+			'ftickets','stickets','tickets','CPU Usage','I/O Usage','Memory Usage',
+			'job share','department','granted_pe','hard_req_queue','hard_request',
+			'hard_request_name','hard_request_resource_contribution',
+			'master','otickets','full_job_name','requested_pe_name','share','ntix',
+			'project','start time','submission time','granted_pe_name','Slots'] 
+	},
+	{
+		\"render\": function ( data, type, row ) {return data==''?1:data;},//set to 1 the slot number if no value is in the cell
+		targets:['Requested slots']
+	}
+]";
 $Format["jobs"]["filter"]=array("Owner");
 ?>

@@ -108,7 +108,7 @@ function addLinksToData(& $data,$links){
 function addFilterToData(& $data,$keys,$filter){
 	foreach($filter as $column){
 		foreach($data[$column] as $rowIndex=>$element){
-			$data[$column][$rowIndex]="<div class=\"div-filter\"onclick=\"filter('".array_search($column,$keys)."',this.innerHTML)\">".$data[$column][$rowIndex]."</div>";
+			$data[$column][$rowIndex]="<div class=\"div-filter\" onclick=\"filter('".array_search($column,$keys)."',this.innerHTML)\">".$data[$column][$rowIndex]."</div>";
 		}
 	}
 
@@ -127,15 +127,9 @@ foreach ($keys as $column){
 	echo "<th class=\"$column\">$column</th>";
 }
 echo "</tr>
-			</thead>
-			<tfoot>
-				<tr>";
-foreach ($keys as $key=>$column){
-	echo "<th><input id=\"search_$key\" type=\"text\" placeholder=\"Search $column\" /></th>";#search inputs are created in tfoot and moved in thead after datatable creation(i cant find a simpler way to make them work right)
-}
-echo "				</tr>
-			</tfoot>
-			<tbody>\n";
+			</thead>\n";
+			
+echo "			<tbody>\n";
 foreach ($data[$keys[0]] as $rowIndex=>$value){
 	echo "				<tr>";
 	foreach ($keys as $key=>$colIndex){
@@ -145,8 +139,15 @@ foreach ($data[$keys[0]] as $rowIndex=>$value){
 	}
 	echo "</tr>\n";
 }
+echo "			</tbody>
+			<tfoot>
+				<tr>";
+foreach ($keys as $key=>$column){
+	echo "<th><input id=\"search_$key\" type=\"text\" placeholder=\"Search $column\" /></th>";#search inputs are created in tfoot and moved in thead after datatable creation(i cant find a simpler way to make them work right)
+}
 ?>
-			</tbody>
+				</tr>
+			</tfoot>
 		</table>
 		<script type="text/javascript">
 			var table;
