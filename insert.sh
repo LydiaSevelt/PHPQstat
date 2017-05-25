@@ -136,7 +136,7 @@ getQueueFromJobXmlVector(){
 }
 #for the slot number i have to count the slave jobs
 #########################gathering data for grafana###################
-DATA=$($QUEUE_COMMAND_GRAPH | awk  '{if($1 !~ /CLUSTER/ && $3 ~ /^[0-9]/){printf "queue used_%s=%s,max_%s=%s\n", $1,$3,$1,$6}}')
+DATA=$($QUEUE_COMMAND_GRAPH | awk  '{if($1 !~ /CLUSTER/ && $3 ~ /^[0-9]/){printf "queue used_%s=%s,max_%s=%s,percentage-used_%s=%s\n", $1,$3,$1,$6,$1,$6==0 ? 0 :$3/$6}}')
 curl -i -u $INFLUXUSER:$INFLUXPASSWORD -XPOST $URL_GRAPH --data-binary "$DATA"
 #######################gathering hosts data###########################
 DATA=$''
