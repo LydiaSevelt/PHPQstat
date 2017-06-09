@@ -64,5 +64,12 @@ margin:0 auto;
 }
 .div-filter:hover {
 	color:#666666;
-
+}
+.div-filter a {
+    color: #337ab7;
+    text-decoration: none;
+}
+.div-filter a:hover,a:focus {
+  color: #23527c;
+  text-decoration: underline;
 }

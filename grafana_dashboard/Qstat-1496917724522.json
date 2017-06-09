@@ -1,19 +1,12 @@
 {
   "__inputs": [
     {
-      "name": "DS_INFLUXPROVA",
-      "label": "influxProva",
+      "name": "DS_INFLUX_QSTAT",
+      "label": "Influx_Qstat",
       "description": "",
       "type": "datasource",
       "pluginId": "influxdb",
       "pluginName": "InfluxDB"
-    },
-    {
-      "name": "VAR_PROVA",
-      "type": "constant",
-      "label": "prova",
-      "value": "used_",
-      "description": ""
     }
   ],
   "__requires": [
@@ -21,12 +14,18 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "4.3.0-beta1"
+      "version": "4.3.1"
     },
     {
       "type": "panel",
       "id": "graph",
       "name": "Graph",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "heatmap",
+      "name": "Heatmap",
       "version": ""
     },
     {
@@ -62,7 +61,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_INFLUXPROVA}",
+          "datasource": "${DS_INFLUX_QSTAT}",
           "description": "slots used/max slots",
           "editable": true,
           "error": false,
@@ -136,7 +135,7 @@
               ],
               "orderByTime": "ASC",
               "policy": "default",
-              "query": "SELECT last(/($Measurement)_($Queues)$/) as \" \" FROM $RetPolicy.queue WHERE $timeFilter GROUP BY time($interval)",
+              "query": "SELECT last(/((^)|(hour-mean_)|(day-mean_))($Measurement)_($Queues)$/) as \" \" FROM $RetPolicy.queue WHERE $timeFilter GROUP BY time($interval)",
               "rawQuery": true,
               "refId": "A",
               "resultFormat": "time_series",
@@ -208,7 +207,7 @@
           "bars": true,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_INFLUXPROVA}",
+          "datasource": "${DS_INFLUX_QSTAT}",
           "description": "Slot Used / Max Slot",
           "fill": 1,
           "height": "300px",
@@ -323,7 +322,7 @@
               "value": "avg"
             }
           ],
-          "datasource": "${DS_INFLUXPROVA}",
+          "datasource": "${DS_INFLUX_QSTAT}",
           "fontSize": "100%",
           "height": "300px",
           "id": 4,
@@ -440,6 +439,100 @@
       "showTitle": false,
       "title": "Dashboard Row",
       "titleSize": "h6"
+    },
+    {
+      "collapse": false,
+      "height": 250,
+      "panels": [
+        {
+          "cards": {
+            "cardPadding": null,
+            "cardRound": null
+          },
+          "color": {
+            "cardColor": "#b4ff00",
+            "colorScale": "sqrt",
+            "colorScheme": "interpolateSpectral",
+            "exponent": 0.5,
+            "mode": "spectrum"
+          },
+          "dataFormat": "timeseries",
+          "heatmap": {},
+          "height": "400px",
+          "highlightCards": true,
+          "id": 5,
+          "links": [],
+          "span": 12,
+          "targets": [
+            {
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "orderByTime": "ASC",
+              "policy": "default",
+              "query": "SELECT last(/^($Measurement)_($Queues)$/) as \" \" FROM $RetPolicy.queue WHERE $timeFilter  GROUP BY time(1h) fill(0)",
+              "rawQuery": true,
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": []
+            }
+          ],
+          "title": "HeatMap",
+          "tooltip": {
+            "show": true,
+            "showHistogram": true
+          },
+          "type": "heatmap",
+          "xAxis": {
+            "show": true
+          },
+          "xBucketNumber": 14,
+          "xBucketSize": null,
+          "yAxis": {
+            "decimals": null,
+            "format": "short",
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true,
+            "splitFactor": null
+          },
+          "yBucketNumber": 15,
+          "yBucketSize": null
+        }
+      ],
+      "repeat": null,
+      "repeatIteration": null,
+      "repeatRowId": null,
+      "showTitle": false,
+      "title": "Dashboard Row",
+      "titleSize": "h6"
     }
   ],
   "schemaVersion": 14,
@@ -450,7 +543,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_INFLUXPROVA}",
+        "datasource": "${DS_INFLUX_QSTAT}",
         "hide": 0,
         "includeAll": false,
         "label": "Ret.Policy",
@@ -459,7 +552,7 @@
         "options": [],
         "query": "show retention policies",
         "refresh": 1,
-        "regex": "",
+        "regex": "/^[^a]/",
         "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
@@ -471,7 +564,7 @@
         "allFormat": "regex wildcard",
         "allValue": null,
         "current": {},
-        "datasource": "${DS_INFLUXPROVA}",
+        "datasource": "${DS_INFLUX_QSTAT}",
         "hide": 0,
         "hideLabel": false,
         "includeAll": true,
@@ -494,7 +587,7 @@
         "allFormat": "regex wildcard",
         "allValue": null,
         "current": {},
-        "datasource": "${DS_INFLUXPROVA}",
+        "datasource": "${DS_INFLUX_QSTAT}",
         "hide": 0,
         "includeAll": false,
         "label": "Measurement",
@@ -504,36 +597,19 @@
         "options": [],
         "query": "show field keys from min.queue",
         "refresh": 1,
-        "regex": "/(.*)_.*/",
+        "regex": "/([^_]*)_.*/",
         "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
         "type": "query",
         "useTags": false
-      },
-      {
-        "current": {
-          "value": "${VAR_PROVA}",
-          "text": "${VAR_PROVA}"
-        },
-        "hide": 2,
-        "label": "prova",
-        "name": "prova",
-        "options": [
-          {
-            "value": "${VAR_PROVA}",
-            "text": "${VAR_PROVA}"
-          }
-        ],
-        "query": "${VAR_PROVA}",
-        "type": "constant"
       }
     ]
   },
   "time": {
-    "from": "now-7d",
-    "to": "now"
+    "from": "2017-03-26T04:31:12.559Z",
+    "to": "2017-05-25T16:18:06.127Z"
   },
   "timepicker": {
     "refresh_intervals": [
@@ -562,5 +638,5 @@
   },
   "timezone": "browser",
   "title": "Qstat",
-  "version": 3
+  "version": 11
 }

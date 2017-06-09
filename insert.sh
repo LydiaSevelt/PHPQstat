@@ -119,7 +119,7 @@ getValuesFromXmlVector(){
 	XPath+="' ',' ')"
 	wait
 	RETURN_DATA+=$(myxml "$XPath" "$2")
-	RETURN_DATA+="{n_values}=$ElemIndex"
+	RETURN_DATA+="{n_values}=$VectorNumber"
 	
 	echo $RETURN_DATA
 }
@@ -129,7 +129,8 @@ getQueueFromJobXmlVector(){
 	local n=$(myxml "count($1)" "$2")	
 	for((i=0;$i<$n;i++))
 	do
-		XPath+="'queue[$i]=\"',string($1[$i]/../name),'\",',"
+		cont=$[ $i +1 ]
+		XPath+="'queue[$i]=\"',string($1[$cont]/../name),'\",',"
 	done
 	XPath+="' ',' ')"
 	echo $(myxml "$XPath" "$2")
