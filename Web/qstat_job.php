@@ -2,7 +2,6 @@
 include("influx.php");
 include("header.php");
 ?>
-
 <table id="job_table" class="display compact nowrap">
 	<thead>
 		<tr><th>name</th><th>value</th>
@@ -29,7 +28,7 @@ foreach ($jobs as $key=>$value){
 					"paging": false,
 					"info": false,
 					"searching": true,
-					"columns":[{className:"dt-right"},{className:"dt-left"}]
+					"columns":[{className:"dt-left"},{className:"dt-left"}]
 				});
 			});
 		</script>

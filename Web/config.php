@@ -25,7 +25,11 @@ $Query["jobs"]="SELECT * FROM jobs group by * order by time DESC limit 1";#trans
 #	-tableOpt: a string that is placed in the javascript code that declares the dataTable 
 #		you can use it to specify datatable option for a single page
 #		the string needs to start with ,
-#	-filter: an array where the values are the names of the columns where the cells are going filter the table if you click on it
+#	-filter: an array where the keys are the names of the columns where the cells are going filter the table if you click on it, 
+#		the value is a valid javascript function that is called onclick
+#		the function is called with 2 params: function(columnIndex,text){...}
+#			-columnIndex is the index of the column starting from left,
+#			-text is the string you want to look for
 #the options have to be in this way $Format["page_name"]["option"]=...
 $Format=array();
 $Format["hostnames"]=array();
@@ -43,15 +47,20 @@ $Format["hosts"]["rename"]=array(
 	"MEMUSE"=>"Memory Used",
 	"MEMTOT"=>"Total Memory",
 	"NCOR"=>"Core Number",
-	"NCPU"=>"CPU Number",
+	"NCPU"=>"Core+HT Number",
 	"NSOC"=>"Socked Number",
 	"ARCH"=>"Architecture"
 );
-$Format["hosts"]["show"]=array("Hostname","Load","Memory Used","Total Memory","Core Number","CPU Number","Socked Number","Architecture"); #shows only load column in this page
+$Format["hosts"]["show"]=array("Hostname","Load","Memory Used","Total Memory","Core Number","Core+HT Number","Socked Number","Architecture"); #shows only load column in this page
 $Format["hosts"]["links"]=array(
 	#"column where link has to be"=>"qstat_job.php?id={a column}"
 );
-$Format["hosts"]["tableOpt"]="";
+$Format["hosts"]["tableOpt"]=",\"columnDefs\": [
+	{ 
+		\"visible\": false,
+		targets: ['Architecture'] 
+	}
+]";
 $Format["hosts"]["filter"]=array();
 
 $Format["queues"]["rename"]=array(
@@ -66,6 +75,7 @@ $Format["queues"]["rename"]=array(
 	
 );
 $Format["queues"]["show"]=array("Name","Load","Slots Used","Total Slots","Available Slots","Temp disabled","Manual intervention","Resv");
+$Format["queues"]["links"]["Name"]="index.php?page=jobs&filter=Queue&text={Name}%40";
 $Format["queues"]["tableOpt"]="";
 $Format["queues"]["filter"]=array();
 $Format["jobs"]["rename"]=array(
@@ -99,19 +109,19 @@ $Format["jobs"]["rename"]=array(
 	"mem_usage"=>"Memory Usage",
 	#"otickets"=>"",
 	"queue"=>"Queue",
-	"requested_pe"=>"Requested slots",
+	"requested_pe"=>"Slots",
 	#"requested_pe_name"=>"",
-	"slots"=>"Slots",
+	"slots"=>"Master Slots",
 	"state"=>"State",
 	#"stickets"=>"",
 	#"tickets"=>""
 );
-$Format["jobs"]["show"]=array("Job Number","Job name","State","Queue","Requested slots","Priority","Owner",
+$Format["jobs"]["show"]=array("Job Number","Job name","State","Queue","Slots","Priority","Owner",
 	"_state","ftickets","stickets",
 	"tickets","CPU Usage","I/O Usage","Memory Usage","Job share","department","granted_pe","hard_req_queue",
 	"hard_request","hard_request_name","hard_request_resource_contribution",
 	"master","otickets","full_job_name","requested_pe_name","share","ntix","project",
-	"start time","submission time","Slots","granted_pe_name","override tickets");
+	"start time","submission time","Master Slots","granted_pe_name","override tickets");
 $Format["jobs"]["links"]["Job Number"]="qstat_job.php?id={Job Number}";
 $Format["jobs"]["tableOpt"]=",\"columnDefs\": [
 	{ 
@@ -121,12 +131,14 @@ $Format["jobs"]["tableOpt"]=",\"columnDefs\": [
 			'job share','department','granted_pe','hard_req_queue','hard_request',
 			'hard_request_name','hard_request_resource_contribution',
 			'master','otickets','full_job_name','requested_pe_name','share','ntix',
-			'project','start time','submission time','granted_pe_name','Slots'] 
+			'project','submission time','granted_pe_name','Master Slots'] 
 	},
 	{
 		\"render\": function ( data, type, row ) {return data==''?1:data;},//set to 1 the slot number if no value is in the cell
-		targets:['Requested slots']
+		targets:['Slots']
 	}
 ]";
-$Format["jobs"]["filter"]=array("Owner");
+$Format["jobs"]["filter"]=array(
+	"Owner"=>"defaultFilter",
+	"Queue"=>"queueFilter");
 ?>

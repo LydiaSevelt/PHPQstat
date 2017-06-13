@@ -86,8 +86,90 @@ function drawAll($data,$format){
 		}
 		addLinksToData($data,$format["links"]);
 		addFilterToData($data,$keys,$format["filter"]);
-		printTable($data,$keys,$format["tableOpt"]);
+		printTable($data,$keys);
+		addScripts($keys,$format["filter"],$format["tableOpt"]);
 	}
+}
+
+#adds all the js script to init datatables and filter inputs
+#Params:
+#	-$keys:		array containing columns names
+#	-$filter: $Format["$page"]["filter"] (see config.php)
+#	-$tableOpt:	string included in dataTables initialization
+function addScripts($keys,$filter,$tableOpt){
+?>
+<script type="text/javascript">
+	var table;
+	function setFilterText(col,text){
+		$('#search_'+col).val(text);
+	}
+	function search(col,text,isRegex,caseSens){
+		table.column(col).search(text,isRegex,!isRegex,!caseSens).draw();
+	}
+	function defaultFilter(col,text){
+		setFilterText(col,text);
+		search(col,text,false,false);
+	}
+	function queueFilter(col,text){
+		var newtext='^'+text.substring(0,text.indexOf('@')+1);
+		setFilterText(col,text.substring(0,text.indexOf('@')+1));
+		search(col,newtext,true,true);
+	}
+	$(document).ready(function() {
+		table=$('#myTable').DataTable({
+			"paging": true,
+			"orderCellsTop": true,
+			"info": false,
+			 //scrollY:        "60vh",
+			 //scrollX:        true,
+			"searching": true,
+			dom: 'Brtlp',
+			"pageLength": 25,
+			"lengthMenu": [[10,20,25,50,75,100,-1],[ 10, 20, 25, 50, 75, 100 ,"All"]],
+			buttons: [{
+				extend: 'colvis',
+				columns: ':not(.noVis)'
+	    		}]
+<?php
+echo $tableOpt
+?>
+		});
+		
+		// Apply the search
+		var visible=table.columns().visible();
+		table.columns().visible(true);
+		table.columns().every( function () {
+			var that = this;
+			var input=$('#search_'+that.index());
+			
+			//alert(input.attr("placeholder")+that.index());
+			//alert(input.attr("placeholder").length);
+
+			input.attr('size',input.attr("placeholder").length-3);
+			input.on( 'keyup change', function () {
+			    if ( that.search() !== this.value ) {
+			       search(that,this.value,false,false);
+			    }
+			} );
+			//alert(visible[that.index()]);
+			that.visible(visible[that.index()]);
+		} );
+		$("#myTable").width("100%");
+<?php
+	if(isset($_GET['filter']) && isset($_GET['text'])){
+		$indexcolumn=array_search($_GET['filter'],$keys);
+		if(isset($filter[$_GET['filter']])){
+			$function=$filter[$_GET['filter']];
+
+		}else{
+			$function="defaultFilter";
+		}
+		echo "".$function."('".$indexcolumn."','".$_GET['text']."');";
+	}
+?>
+	} );
+</script>
+<?php
 }
 #adds <a href... to a cell if defined so in config.php
 #Params:
@@ -104,11 +186,16 @@ function addLinksToData(& $data,$links){
 		}
 	}
 }
-
+#adds a div to make all cells in a column clickable
+#Params:
+#	-$data:  data in format Matrix[$column][$row]
+#	-$keys:		array containing columns names
+#	-$filter: $Format["$page"]["filter"] (see config.php)
 function addFilterToData(& $data,$keys,$filter){
-	foreach($filter as $column){
+	foreach($filter as $column=>$function){
+		$indexcolumn=array_search($column,$keys);
 		foreach($data[$column] as $rowIndex=>$element){
-			$data[$column][$rowIndex]="<div class=\"div-filter\" onclick=\"filter('".array_search($column,$keys)."',this.innerHTML)\">".$data[$column][$rowIndex]."</div>";
+			$data[$column][$rowIndex]="<div class=\"div-filter\" onclick=\"".$function."('".$indexcolumn."',this.innerHTML)\">".$data[$column][$rowIndex]."</div>";
 		}
 	}
 
@@ -118,18 +205,25 @@ function addFilterToData(& $data,$keys,$filter){
 #Params:
 #	-$data:		data in format Matrix[$column][$row]
 #	-$keys:		array containing columns names
-#	-$tableOpt:	string included in dataTables initialization
-function printTable($data,$keys,$tableOpt){
+function printTable($data,$keys){
 echo "		<table id=\"myTable\" class=\"display compact nowrap\">
 			<thead>
 				<tr>";
 foreach ($keys as $column){
 	echo "<th class=\"$column\">$column</th>";
 }
-echo "</tr>
-			</thead>\n";
-			
-echo "			<tbody>\n";
+?>
+				</tr>
+				<tr>
+<?php
+foreach ($keys as $key=>$column){
+	echo "<td><input id=\"search_$key\" type=\"text\" placeholder=\"Search $column\" /></td>";#search inputs are created in tfoot and moved in thead after datatable creation(i cant find a simpler way to make them work right)
+}
+?>
+				</tr>
+			</thead>		
+			<tbody>
+<?php
 foreach ($data[$keys[0]] as $rowIndex=>$value){
 	echo "				<tr>";
 	foreach ($keys as $key=>$colIndex){
@@ -139,53 +233,9 @@ foreach ($data[$keys[0]] as $rowIndex=>$value){
 	}
 	echo "</tr>\n";
 }
-echo "			</tbody>
-			<tfoot>
-				<tr>";
-foreach ($keys as $key=>$column){
-	echo "<th><input id=\"search_$key\" type=\"text\" placeholder=\"Search $column\" /></th>";#search inputs are created in tfoot and moved in thead after datatable creation(i cant find a simpler way to make them work right)
-}
 ?>
-				</tr>
-			</tfoot>
+			</tbody>
 		</table>
-		<script type="text/javascript">
-			var table;
-			function filter(col,text){
-				$('#search_'+col).val(text);
-				search(col,text);
-			}
-			function search(col,text){
-				table.column(col).search(text).draw();
-			}
-			$(document).ready(function() {
-				table=$('#myTable').DataTable({
-					"paging": true,
-					"info": false,
-					"searching": true,
-					dom: 'Brtlp',
-					"pageLength": 25,
-					"lengthMenu": [[10,20,25,50,75,100,-1],[ 10, 20, 25, 50, 75, 100 ,"All"]],
-					buttons: [{
-						extend: 'colvis',
-						columns: ':not(.noVis)'
-			    		}]
-<?php
-echo $tableOpt
-?>
-				});
-				$('#myTable tfoot tr').appendTo('#myTable thead');
-				// Apply the search
-				table.columns().every( function () {
-					var that = this;
-					$( 'input', this.footer() ).on( 'keyup change', function () {
-					    if ( that.search() !== this.value ) {
-					       search(that,this.value);
-					    }
-					} );
-				} );
-			} );
-		</script>
 <?php
 }
 ?>
