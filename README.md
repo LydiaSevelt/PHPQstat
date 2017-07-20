@@ -72,22 +72,37 @@ INSTALL
     systemctl start grafana-server
     ```
  
-3. Set up variables in influx_config.sh
-4. run enable_auth_influx-sh or do it mannually (you may need sudo) and wait a few seconds
-5. Setup retention policy duration in  init_influx.sh :  
-    defalut is INF (old data is not deleted )
-    you can set the duration in time of the table containig 1)all measurements from qstat,
-    2) the hour mean,
-    3)the day mean 
-6. run init_influx.sh
-7. (optional) copy data from previous rrd database
+3. Set sge path and influxDB connection params in `influx_config.sh`
+4. find influxDB conf file and set the path in `enable_auth_influx.sh`,
+    run `enable_auth_influx.sh` 
+	```
+	sudo bash enable_auth_influx.sh
+	```
+5.  Setup retention policy duration in  `init_influx.sh`:
+    defalut is INF (old data is not deleted);
+
+	
+	for more information click [here](https://docs.influxdata.com/influxdb/v1.2/query_language/database_management/#create-retention-policies-with-create-retention-policy);
+
+    you can set the duration in time of the table containig: 
+     1. all measurements from qstat,
+     2. the hour mean,
+     3. the day mean
+	 
+	```
+	bash init_influx.sh
+	```
+6. (optional) copy data from previous rrd database
    
    run insert_rrd.sh ( you need to have rrd folder in the same path)
-8. start data gathering
-    set $SCRIPTPATH in insert.sh and insert_tables.sh with the absolute path of the scripts(this is done because when those script are in crontab relative path fails)
-    Add the following line to the proper users crontab, making sure you replace [...]/insert.sh with the proper path :  
-    */3 * * * * [...]/insert.sh > /dev/null 2>&1
-9. set graphana:
+7. start data gathering:
+
+    set $SCRIPTPATH in `insert.sh` with the absolute path of the scripts(this is done because when those script are in crontab relative path fails)
+    Add the following line to the proper users crontab, making sure you replace [...]/insert.sh with the proper path : 
+    ``` 
+    */3 * * * * root [...]/insert.sh > /dev/null 2>&1
+    ```
+8. set graphana:
     you can access grafana with [YOUR_URL]:3000
     default login admin admin
     - insert data source influxdb with url user:user password:user
@@ -100,12 +115,9 @@ INSTALL
         - you can make all max values be displayed differently by adding series ovverride (display tab)with regex /max_.*/
     -remember to save the dashboard!
  
-10. set parameters in config.php 
-    set grafana url (go to you dashboard->share dashboard->link to dashboard or just copy paste browser url)
+9. set parameters in config.php :
+
+    set grafana url (go to you dashboard->share dashboard->link to dashboard or just copy paste browser url);
+
     set Format for hosts,queues,jobs
-11. Set users in grafana so that not everyone can modify graph dashboard ecc.(you can also make users be able to modify the dashboard as they want, but they cannot save), you can disable log-in in the configuration file (auth.anonymous enabled=true)
- 
- 
-  OPTIONAL
-  ----------------------------------------------
-12. Replace PHPQstat/img/logo.png with the logo of your company/school to brand the page  
+10. Set users in grafana so that not everyone can modify graph dashboard ecc.(you can also make users be able to modify the dashboard as they want, but they cannot save), you can disable log-in in the configuration file (auth.anonymous enabled=true)

@@ -4,14 +4,15 @@ DATABASE='QstatDB'
 RET_POLICY='min'
 URL="$DBURL:$PORT/write?db=$DATABASE&rp=$RET_POLICY"
 TABLENAME='queue'
-TIMESTAMP=1490713018 #data newer than this timestamp will be ignored
+#data newer than this timestamp will be ignored
+TIMESTAMP=2490713018
 QUEUES=$(ls -l rrd/qacct* |awk '{print $9}')
 influxd backup -database $DATABASE ./
 for q in $QUEUES ;do
 	rrdtool dump  $q |awk -v x=$q -v y=$TABLENAME -v z=$TIMESTAMP '
 		BEGIN{match(x,"rrd/qacct_(.*).rrd",b)}
 		{
-		match($8,"^<row><v>([^N]*)</v></row>$",a);
+		match($0,".*<row><v>[[:space:]]+([^N]*)</v></row>",a);
 		if(a[1] ~ /^[0-9]/ && $6<z)
 			{printf "%s used_%s=%s %s000000000\n",y, b[1] ,a[1],$6}
 		}' >file.txt
