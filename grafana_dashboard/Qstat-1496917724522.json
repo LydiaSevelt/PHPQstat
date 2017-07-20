@@ -575,7 +575,7 @@
         "options": [],
         "query": "show field keys from min.queue",
         "refresh": 1,
-        "regex": "/.*_(.*)/",
+        "regex": "/[^_]*_(.*)/",
         "sort": 1,
         "tagValuesQuery": "",
         "tags": [],
