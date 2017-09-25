@@ -25,7 +25,6 @@ getValuesFromXmlVector(){
 	#find number of elements
 	local VectorNumber=$(myxml "count($1)" "$2" )
 	#find number of attributes of main tag and number of node child for every element
-	
 	local ElemIndex=0
 	local ElemIndex2
 	local ElemIter
@@ -38,10 +37,10 @@ getValuesFromXmlVector(){
 	done
 	XPath+="' ',' ')"
 	local NPar=$(myxml "$XPath" "$2")
-	
 	#get values&names of attributes of main tag and values&names of node child, getting number of attributes of node child for every element
 	ElemIter=0
 	local RETURN_DATA=$''
+	local NparChild=$''
 	XPath=$'concat('
 	local XPath2=$'concat('
 	for n in $NPar;
@@ -73,13 +72,16 @@ getValuesFromXmlVector(){
 			XPath+="' ',' ')"
 			RETURN_DATA+=$(myxml "$XPath" "$2")
 			XPath=$'concat('
+			XPath2+="' ',' ')"
+			NparChild+=$(myxml "$XPath2" "$2")
+			XPath2=$'concat('
 		fi
 			
 	done
 	XPath+="' ',' ')"
 	XPath2+="' ',' ')"
-	local RETURN_DATA+=$(myxml "$XPath" "$2")
-	local NparChild=$(myxml "$XPath2" "$2")
+	RETURN_DATA+=$(myxml "$XPath" "$2")
+	NparChild=$(myxml "$XPath2" "$2")
 	ElemIndex=0
 	local countPar=1
 	local thisJob
@@ -179,9 +181,9 @@ getJobs(){
 	t=$(getQueueFromJobXmlVector "(job_info/queue_info/Queue-List/job_list[master=\"MASTER\"])" "$JOB_RESULT")
 	JOBS_DATA+=",$t"
 	JOBS_DATA=${JOBS_DATA:0:$[ ${#JOBS_DATA} -1 ]}
-	curl -i -u $INFLUXUSER:$INFLUXPASSWORD -XPOST $URL --data-binary "$JOBS_DATA"
+	echo "$JOBS_DATA">temp
+	curl -i -u $INFLUXUSER:$INFLUXPASSWORD -XPOST $URL --data-binary @temp
 }
 #######################################################################
 getQueues & 
 getJobs
-
